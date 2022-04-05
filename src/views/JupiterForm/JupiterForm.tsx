@@ -31,6 +31,17 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
     Awaited<ReturnType<typeof api.v1QuoteGet>>["data"]
   >([]);
 
+  let top3='';
+  routes?.forEach(route=>{
+    if( route.marketInfos!==undefined){    
+      top3=top3+route.marketInfos[0].label+","}
+    
+  }
+    )
+
+
+  console.log(top3)
+
   const [inputTokenInfo, outputTokenInfo] = useMemo(() => {
     return [
       tokenMap.get(formValue.inputMint?.toBase58() || ""),
@@ -73,6 +84,7 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
 
   // ensure outputMint can be swapable to inputMint
   useEffect(() => {
+    console.log(tokenMap);
     if (formValue.inputMint) {
       const possibleOutputs = routeMap.get(formValue.inputMint.toBase58());
 

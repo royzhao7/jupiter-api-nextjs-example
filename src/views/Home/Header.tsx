@@ -1,4 +1,5 @@
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
+import { WalletDisconnectButton, WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import React from 'react'
 
 const Header = () => {
@@ -11,9 +12,11 @@ const Header = () => {
             </div>
             <div className="flex-1 px-2 mx-2">
                 <span className="text-lg font-bold">Caw Caw</span>
+
+                
             </div>
             <div className="flex-none">
-                <WalletMultiButton className="btn btn-ghost" />
+                <WalletMultiButton className="btn btn-ghost" />   
             </div>
         </div>
     )

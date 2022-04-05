@@ -65,7 +65,7 @@ const SiteDescription = () => {
                 <div className="text-center hero-content">
                     <div>
                         <h1 className="mb-5 text-5xl font-bold">
-                            Hello Solana <SolanaLogo /> World!
+                            Hello Solana <SolanaLogo /> World! 
                         </h1>
 
                         <div className="max-w-md">
