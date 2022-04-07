@@ -7,7 +7,7 @@ import { INPUT_MINT_ADDRESS, OUTPUT_MINT_ADDRESS } from "../../constants";
 import styles from "./JupiterForm.module.css";
 import { useJupiterApiContext } from "../../contexts/JupiterApiProvider";
 
-interface IJupiterFormProps {}
+interface IJupiterFormProps { }
 interface IState {
   amount: number;
   inputMint: PublicKey;
@@ -31,13 +31,14 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
     Awaited<ReturnType<typeof api.v1QuoteGet>>["data"]
   >([]);
 
-  let top3='';
-  routes?.forEach(route=>{
-    if( route.marketInfos!==undefined){    
-      top3=top3+route.marketInfos[0].label+","}
-    
+  let top3 = '';
+  routes?.forEach(route => {
+    if (route.marketInfos !== undefined) {
+      top3 = top3 + route.marketInfos[0].label + ","
+    }
+
   }
-    )
+  )
 
 
   console.log(top3)
@@ -106,9 +107,40 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
 
   return (
     <div className="max-w-full md:max-w-lg">
+      <div className="mb-2 flex flex-row-reverse">
+        <label htmlFor="my-modal" className="btn modal-button">1%</label>
+        <input type="checkbox" id="my-modal" className="modal-toggle" />
+        <div className="modal">
+          <div className="modal-box">
+            <label htmlFor="my-modal" className="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 className="font-bold text-lg">滑点设置</h3>
+            <div className="flex justify-between mt-5">
+              <div className=""><button className="btn btn-lg w-32">0.1%</button></div>
+              <div className=""><button className="btn btn-lg btn-secondary w-32">0.5%</button></div>
+              <div className=""> <button className="btn btn-lg w-32">1%</button></div>
+            </div>
+            <div className="form-control w-full max-w-full">
+              <label className="label">
+                <span className="label-text">或手动输入</span>
+              </label>
+              <input type="text" placeholder="0.00%" className="input input-bordered w-full max-w-full" />
+            </div>
+            <div className="form-control w-full max-w-full">
+              <label className="label">
+                <span className="label-text">RPC设置</span>
+              </label>
+              <input type="text" placeholder="https://solana-api.projectserum.com" className="input input-bordered w-full max-w-full" />
+            </div>
+            <div className="modal-action w-full max-w-full">
+              <label htmlFor="my-modal" className="btn w-full max-w-full">保存设置</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="mb-2">
         <label htmlFor="inputMint" className="block text-sm font-medium">
-          Input token
+          您将支付
         </label>
         <select
           id="inputMint"
@@ -137,7 +169,7 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
 
       <div className="mb-2">
         <label htmlFor="outputMint" className="block text-sm font-medium">
-          Output token
+          您将收到
         </label>
         <select
           id="outputMint"
@@ -166,7 +198,7 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
 
       <div>
         <label htmlFor="amount" className="block text-sm font-medium">
-          Input Amount ({inputTokenInfo?.symbol})
+          支付金额 ({inputTokenInfo?.symbol})
         </label>
         <div className="mt-1">
           <input
@@ -190,9 +222,8 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
 
       <div className="flex justify-center">
         <button
-          className={`${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
-          } inline-flex items-center px-4 py-2 mt-4 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
+          className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""
+            } inline-flex items-center px-4 py-2 mt-4 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500`}
           type="button"
           onClick={fetchRoute}
           disabled={isLoading}
@@ -202,11 +233,16 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
               className={`${styles.loader} mr-4 ease-linear rounded-full border-8 border-t-8 border-gray-200 h-24 w-24`}
             ></div>
           )}
-          Refresh rate
+          刷新线路
         </button>
       </div>
 
-      <div>Total routes: {routes?.length}</div>
+      <div>已找到{routes?.length}个路径!</div>
+
+      <div className="indicator mt-4" >
+        <span className="indicator-item ml-14 indicator-start badge badge-secondary">最优的交易价格</span>
+        <div className="grid w-80 h-16  bg-base-300 place-items-center">content</div>
+      </div>
 
       {routes?.[0] &&
         (() => {
@@ -281,9 +317,9 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
             }
             setIsSubmitting(false);
           }}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          className="w-full items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          {isSubmitting ? "Swapping.." : "Swap Best Route"}
+          {isSubmitting ? "兑换中.." : "兑换"}
         </button>
       </div>
     </div>

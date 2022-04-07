@@ -11,7 +11,7 @@ const Header = () => {
                 </button>
             </div>
             <div className="flex-1 px-2 mx-2">
-                <span className="text-lg font-bold">Caw Caw</span>
+                <span className="text-lg font-bold">Jupiter</span>
 
                 
             </div>

@@ -69,13 +69,6 @@ const SiteDescription = () => {
                         </h1>
 
                         <div className="max-w-md">
-                            <p className="mb-5">
-                                This scaffold includes awesome tools for rapid development and
-                                deploy dapps to Solana: Next.JS, TypeScript, TailwindCSS,
-                                Daisy UI.
-                            </p>
-                            <p className="mb-5">Solana wallet adapter is connected and ready to use.</p>
-                            <p className="mb-5">Environment: {ENV}</p>
                             {publicKey
                                 ? (
                                     <>Your address: {publicKey.toBase58()}</>
@@ -83,9 +76,6 @@ const SiteDescription = () => {
                                 : (
                                     <div>
                                         <p>Wallet not connected</p>
-                                        <div className='flex justify-center'>
-                                            <WalletMultiButton />
-                                        </div>
                                     </div>
                                 )
                             }
