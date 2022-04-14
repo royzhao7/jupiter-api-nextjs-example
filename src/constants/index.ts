@@ -1,4 +1,4 @@
-import { Cluster } from "@solana/web3.js";
+import { Cluster,Connection } from "@solana/web3.js";
 import { ENV as ENVChainId } from "@solana/spl-token-registry";
 
 require('dotenv').config()
@@ -25,6 +25,7 @@ export const OUTPUT_MINT_ADDRESS = ENV === "devnet"
     ? "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt" // SRM
     : "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"; // USDT
 
+export const RPC_CONNECTION = new Connection(SOLANA_RPC_ENDPOINT); // Setup Solana RPC connection
 // Interface
 export interface Token {
     chainId: number; // 101,

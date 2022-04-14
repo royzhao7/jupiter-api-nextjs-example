@@ -2,10 +2,18 @@ import React, { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { PublicKey, Transaction } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
-import { INPUT_MINT_ADDRESS, OUTPUT_MINT_ADDRESS } from "../../constants";
+import { INPUT_MINT_ADDRESS, OUTPUT_MINT_ADDRESS, Token } from "../../constants";
 
 import styles from "./JupiterForm.module.css";
 import { useJupiterApiContext } from "../../contexts/JupiterApiProvider";
+import SelectSearch, { fuzzySearch } from 'react-select-search-nextjs';
+import {
+  getPlatformFeeAccounts,
+  Jupiter,
+  RouteInfo,
+  TOKEN_LIST_URL,
+} from "@jup-ag/core";
+
 
 interface IJupiterFormProps { }
 interface IState {
@@ -20,28 +28,39 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
   const { connection } = useConnection();
   const { tokenMap, routeMap, loaded, api } = useJupiterApiContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSlippage, setIsSlippage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValue, setFormValue] = useState<IState>({
-    amount: 1 * 10 ** 6, // unit in lamports (Decimals)
+    amount: 10, // unit in lamports (Decimals)
     inputMint: new PublicKey(INPUT_MINT_ADDRESS),
     outputMint: new PublicKey(OUTPUT_MINT_ADDRESS),
     slippage: 1, // 0.1%
   });
-  const [routes, setRoutes] = useState<
-    Awaited<ReturnType<typeof api.v1QuoteGet>>["data"]
-  >([]);
+  const [routes, setRoutes] = useState<RouteInfo[]>([]);
+
+
+  const inputMintOptions =  Array.from(routeMap.keys()).map((tokenMint) => {
+   return ({ name: tokenMap.get(tokenMint)?.name || "unknown", value: tokenMint })
+  })
+
+
+
+
+  const options = [
+    {name: 'Swedish', value: 'sv'},
+    {name: 'English', value: 'en'},
+   
+];
 
   let top3 = '';
   routes?.forEach(route => {
     if (route.marketInfos !== undefined) {
-      top3 = top3 + route.marketInfos[0].label + ","
+      top3 = top3 + route.marketInfos[0].amm.label + ","
     }
 
   }
   )
 
-
-  console.log(top3)
 
   const [inputTokenInfo, outputTokenInfo] = useMemo(() => {
     return [
@@ -54,55 +73,128 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
     formValue.outputMint?.toBase58(),
   ]);
 
-  // Good to add debounce here to avoid multiple calls
-  const fetchRoute = React.useCallback(() => {
-    setIsLoading(true);
-    api
-      .v1QuoteGet({
-        amount: formValue.amount,
-        inputMint: formValue.inputMint.toBase58(),
-        outputMint: formValue.outputMint.toBase58(),
-        slippage: formValue.slippage,
-      })
-      .then(({ data }) => {
-        if (data) {
-          setRoutes(data);
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [api, formValue]);
+  const toggleBtn = () => {
+    if (isSlippage) {
+      setIsSlippage(false);
+    } else {
+      setIsSlippage(true);
+    }
+  }
 
-  useEffect(() => {
-    fetchRoute();
-  }, [fetchRoute]);
+// const intervalFetchRoute=()=>{
+//   const interval = 100;
+//   setTimeout(() => {
+//     const interval = setInterval(() => {
+//     /* do repeated stuff */
+//     fetchRoute()
+//     }, 2000)
+//   }, 5000)
+
+
+// console.log(Date.now());
+// }
+
+
+//   // Good to add debounce here to avoid multiple calls
+//   const fetchRoute = React.useCallback(() => {
+//     setIsLoading(true);
+//     api
+//       .v1QuoteGet({
+//         amount: formValue.amount * 10 ** 6,
+//         inputMint: formValue.inputMint.toBase58(),
+//         outputMint: formValue.outputMint.toBase58(),
+//         slippage: formValue.slippage
+//       })
+//       .then(({ data }) => {
+//         if (data) {
+//           setRoutes(data);
+//         }
+//       })
+//       .finally(() => {
+//         setIsLoading(false);
+//       });
+//   }, [api, formValue]);
+
+//   useEffect(() => {
+//     fetchRoute();
+//   }, [fetchRoute]);
+
+
+
+  const fetchRoute = async ({
+    jupiter,
+    inputToken,
+    outputToken,
+    inputAmount,
+    slippage,
+  }: {
+    jupiter: Jupiter;
+    inputToken?: Token;
+    outputToken?: Token;
+    inputAmount: number;
+    slippage: number;
+  }) => {
+    try {
+      if (!inputToken || !outputToken) {
+        return null;
+      }
+  
+      console.log(
+        `Getting routes for ${inputAmount} ${inputToken.symbol} -> ${outputToken.symbol}...`
+      );
+      const inputAmountInSmallestUnits = inputToken
+        ? Math.round(inputAmount * 10 ** inputToken.decimals)
+        : 0;
+      const routes =
+        inputToken && outputToken
+          ? await jupiter.computeRoutes({
+              inputMint: new PublicKey(inputToken.address),
+              outputMint: new PublicKey(outputToken.address),
+              inputAmount: inputAmountInSmallestUnits, // raw input amount of tokens
+              slippage,
+              forceFetch: true,
+              
+            })
+          : null;
+  
+      // if (routes && routes.routesInfos) {
+      //   console.log(routes.routesInfos[0].marketInfos?.map((info) => info.amm.label));
+      //   console.log(routes.routesInfos[1].marketInfos?.map((info) => info.amm.label));
+      //   console.log(routes.routesInfos[2].marketInfos?.map((info) => info.amm.label));
+      //   console.log("Possible number of routes:", routes.routesInfos.length);
+      //   console.log(
+      //     "Best quote: ",
+      //     routes.routesInfos[0].outAmount / 10 ** outputToken.decimals,
+      //     `(${outputToken.name})`
+      //   );
+      //   return routes;
+      // } else {
+      //   return null;
+      // }
+    } catch (error) {
+      throw error;
+    }
+  };
+
 
   const validOutputMints = useMemo(
     () => routeMap.get(formValue.inputMint?.toBase58() || "") || [],
     [routeMap, formValue.inputMint?.toBase58()]
   );
 
+
+  const outputOptions =  validOutputMints.map((tokenMint) => {
+    return ({ name: tokenMap.get(tokenMint)?.name || "unknown", value: tokenMint })
+   })
+ 
+
   // ensure outputMint can be swapable to inputMint
   useEffect(() => {
-    console.log(tokenMap);
-    if (formValue.inputMint) {
-      const possibleOutputs = routeMap.get(formValue.inputMint.toBase58());
-
-      if (
-        possibleOutputs &&
-        !possibleOutputs?.includes(formValue.outputMint?.toBase58() || "")
-      ) {
-        setFormValue((val) => ({
-          ...val,
-          outputMint: new PublicKey(possibleOutputs[0]),
-        }));
-      }
-    }
+  
   }, [formValue.inputMint?.toBase58(), formValue.outputMint?.toBase58()]);
 
   if (!loaded) {
-    return <div>Loading jupiter routeMap...</div>;
+    return <div>刷新线路中...</div>;
   }
 
   return (
@@ -116,7 +208,8 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
             <h3 className="font-bold text-lg">滑点设置</h3>
             <div className="flex justify-between mt-5">
               <div className=""><button className="btn btn-lg w-32">0.1%</button></div>
-              <div className=""><button className="btn btn-lg btn-secondary w-32">0.5%</button></div>
+              <div className=""><button className={`${isSlippage ? "btn-secondary" : ""
+            } btn btn-lg w-32`} onClick={toggleBtn} >0.5%</button></div>
               <div className=""> <button className="btn btn-lg w-32">1%</button></div>
             </div>
             <div className="form-control w-full max-w-full">
@@ -142,13 +235,15 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
         <label htmlFor="inputMint" className="block text-sm font-medium">
           您将支付
         </label>
-        <select
+        <SelectSearch
           id="inputMint"
-          name="inputMint"
-          className="mt-1 bg-neutral block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          options={inputMintOptions}
+          search filterOptions={fuzzySearch}
           value={formValue.inputMint?.toBase58()}
-          onChange={(e) => {
-            const pbKey = new PublicKey(e.currentTarget.value);
+          onChange={e => {
+            const pbKey = new PublicKey(e);
+            console.log('inputMint:'+formValue.inputMint?.toBase58())
+            console.log('outputMint:'+formValue.outputMint?.toBase58())
             if (pbKey) {
               setFormValue((val) => ({
                 ...val,
@@ -156,28 +251,22 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
               }));
             }
           }}
-        >
-          {Array.from(routeMap.keys()).map((tokenMint) => {
-            return (
-              <option key={tokenMint} value={tokenMint}>
-                {tokenMap.get(tokenMint)?.name || "unknown"}
-              </option>
-            );
-          })}
-        </select>
-      </div>
+        />
 
+      </div>
+          
       <div className="mb-2">
         <label htmlFor="outputMint" className="block text-sm font-medium">
           您将收到
         </label>
-        <select
+        <SelectSearch
           id="outputMint"
-          name="outputMint"
-          className="mt-1 bg-neutral block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          options={outputOptions}
+          search filterOptions={fuzzySearch}
           value={formValue.outputMint?.toBase58()}
           onChange={(e) => {
-            const pbKey = new PublicKey(e.currentTarget.value);
+            const pbKey = new PublicKey(e);
+        
             if (pbKey) {
               setFormValue((val) => ({
                 ...val,
@@ -185,15 +274,8 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
               }));
             }
           }}
-        >
-          {validOutputMints.map((tokenMint) => {
-            return (
-              <option key={tokenMint} value={tokenMint}>
-                {tokenMap.get(tokenMint)?.name || "unknown"}
-              </option>
-            );
-          })}
-        </select>
+        />
+         
       </div>
 
       <div>
@@ -214,7 +296,13 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
               setFormValue((val) => ({
                 ...val,
                 amount: Math.max(newValue, 0),
-              }));
+              }
+              
+             
+              ));
+              if(routes?.[0].outAmount&& routes?.[0].outAmount>newValue){
+              //  intervalFetchRoute();
+              }
             }}
           />
         </div>
@@ -237,28 +325,34 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
         </button>
       </div>
 
-      <div>已找到{routes?.length}个路径!</div>
+      <div>已找到{routes?.length==undefined?0:routes.length==0?0:routes.length-1}个路径</div>
 
-      <div className="indicator mt-4" >
-        <span className="indicator-item ml-14 indicator-start badge badge-secondary">最优的交易价格</span>
-        <div className="grid w-80 h-16  bg-base-300 place-items-center">content</div>
-      </div>
 
       {routes?.[0] &&
         (() => {
           const route = routes[0];
+          const secondaryRoute = routes[1];
           if (route) {
             return (
               <div>
-                <div>
-                  Best route info :{" "}
-                  {route.marketInfos?.map((info) => info.label)}
+                <div className="indicator mt-4 w-full">
+                  <span className="indicator-item ml-14 indicator-start badge badge-secondary">最优的交易价格</span>
+                  <div className="grid grid-cols-2 gap-4 w-full h-16  bg-gray-400">
+                    <div className="pt-4 pl-2">  {route.marketInfos?.map((info) => info.amm.label)}</div>
+                    <div className="pt-4 pl-8">  <p className="text-xl font-sans">  {(route.outAmount || 0) /
+                      10 ** (outputTokenInfo?.decimals || 1)}{" "}
+                      {outputTokenInfo?.symbol}</p> </div>
+                  </div>
                 </div>
-                <div>
-                  Output:{" "}
-                  {(route.outAmount || 0) /
-                    10 ** (outputTokenInfo?.decimals || 1)}{" "}
-                  {outputTokenInfo?.symbol}
+                <div className="indicator mt-4 w-full" >
+                  <div className="grid grid-cols-2 gap-4 w-full h-16  bg-gray-400">
+
+                    <div className="pt-4 pl-2">     {secondaryRoute.marketInfos?.map((info) => info.label)}</div>
+                    <div className="pt-4 pl-8">   <p className="text-xl font-sans">   {(secondaryRoute.outAmount || 0) /
+                      10 ** (outputTokenInfo?.decimals || 1)}{" "}
+                      {outputTokenInfo?.symbol}</p></div>
+
+                  </div>
                 </div>
               </div>
             );
@@ -287,8 +381,12 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
                   body: {
                     route: routes[0],
                     userPublicKey: wallet.publicKey.toBase58(),
+                    wrapUnwrapSOL:false
                   },
                 });
+
+                console.log(wallet.publicKey)
+                console.log(wallet.publicKey.toBase58())
                 const transactions = (
                   [
                     setupTransaction,

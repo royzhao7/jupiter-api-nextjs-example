@@ -1,7 +1,14 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Configuration, DefaultApi } from "@jup-ag/api";
 import { TokenInfo, TokenListProvider } from "@solana/spl-token-registry";
-import { CHAIN_ID } from "../constants";
+import { CHAIN_ID, ENV, RPC_CONNECTION } from "../constants";
+import {
+  getPlatformFeeAccounts,
+  Jupiter,
+  RouteInfo,
+  TOKEN_LIST_URL,
+} from "@jup-ag/core";
+import { PublicKey, Transaction } from "@solana/web3.js";
 
 type RouteMap = Map<string, string[]>;
 
@@ -12,6 +19,9 @@ interface JupiterApiContext {
   routeMap: RouteMap;
 }
 
+
+
+
 const JupiterApiContext = React.createContext<JupiterApiContext | null>(null);
 
 export const JupiterApiProvider: React.FC<{}> = ({ children }) => {
@@ -19,7 +29,7 @@ export const JupiterApiProvider: React.FC<{}> = ({ children }) => {
   const [routeMap, setRouteMap] = useState<RouteMap>(new Map());
   const [loaded, setLoaded] = useState(false);
   const api = useMemo(() => {
-    const config = new Configuration({ basePath: "https://quote-api.jup.ag" });
+    const config = new Configuration({ basePath: "https://quote-api.jup.ag"});
     return new DefaultApi(config);
   }, []);
   useEffect(() => {
@@ -47,7 +57,7 @@ export const JupiterApiProvider: React.FC<{}> = ({ children }) => {
         }, new Map())
       );
       setRouteMap(routeMap);
-      setLoaded(true);
+      setLoaded(false);
     })();
   }, []);
 
@@ -69,3 +79,12 @@ export const useJupiterApiContext = () => {
 
   return context;
 };
+
+
+  //  Load Jupiter
+ export const jupiter =  Jupiter.load({
+    connection:RPC_CONNECTION,
+    cluster: ENV,
+    user: new PublicKey("3FTB3HmFm9tweet7nXoDvZQkxt4M7KJioCujy2zhdyto"), // or public key
+    restrictIntermediateTokens:false,
+  });

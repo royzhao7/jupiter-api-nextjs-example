@@ -58,7 +58,7 @@ const SolanaLogo = () => (
 
 const SiteDescription = () => {
     const { publicKey } = useWallet();
-
+    console.log(publicKey);
     return (
         <div className="w-full text-center pt-2">
             <div className="hero">
@@ -75,7 +75,7 @@ const SiteDescription = () => {
                                 )
                                 : (
                                     <div>
-                                        <p>Wallet not connected</p>
+                                        <p>钱包未连接</p>
                                     </div>
                                 )
                             }

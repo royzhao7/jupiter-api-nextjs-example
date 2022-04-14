@@ -6,6 +6,7 @@ import { ConnectionProvider } from "@solana/wallet-adapter-react";
 import "tailwindcss/tailwind.css";
 import "../styles/globals.css";
 import "../styles/App.css";
+import "../styles/search.css"
 import { JupiterApiProvider } from "../contexts/JupiterApiProvider";
 
 const WalletProvider = dynamic(
