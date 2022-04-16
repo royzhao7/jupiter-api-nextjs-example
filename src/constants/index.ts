@@ -1,5 +1,7 @@
-import { Cluster,Connection } from "@solana/web3.js";
+import { Cluster,Connection,Keypair } from "@solana/web3.js";
 import { ENV as ENVChainId } from "@solana/spl-token-registry";
+import bs58 from "bs58";
+
 
 require('dotenv').config()
 
@@ -26,6 +28,10 @@ export const OUTPUT_MINT_ADDRESS = ENV === "devnet"
     : "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"; // USDT
 
 export const RPC_CONNECTION = new Connection(SOLANA_RPC_ENDPOINT); // Setup Solana RPC connection
+
+export const WALLET_PRIVATE_KEY ="N2yt2S7Msfxbkyj2WXwKCmNskj6iQ3G8V4QoDdzMYP342Sumwji5dNP5e7cu69Fj7ZspGgHTsLrqfhvRRBpYBGa";
+export const USER_PRIVATE_KEY = bs58.decode(WALLET_PRIVATE_KEY);
+export const USER_KEYPAIR = Keypair.fromSecretKey(USER_PRIVATE_KEY);
 // Interface
 export interface Token {
     chainId: number; // 101,
