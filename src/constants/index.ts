@@ -1,6 +1,7 @@
 import { Cluster,Connection,Keypair } from "@solana/web3.js";
 import { ENV as ENVChainId } from "@solana/spl-token-registry";
 import bs58 from "bs58";
+import { useState } from "react";
 
 
 require('dotenv').config()
@@ -14,7 +15,7 @@ export const CHAIN_ID = ENV === 'mainnet-beta'
         : ENV === 'testnet'
             ? ENVChainId.Testnet
             : ENVChainId.MainnetBeta
-export const SOLANA_RPC_ENDPOINT = ENV === "devnet"
+export const  SOLANA_RPC_ENDPOINT = ENV === "devnet"
     ? 'https://api.devnet.solana.com'
     : "https://solana-api.projectserum.com";
 

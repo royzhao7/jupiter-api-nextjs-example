@@ -1,11 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Configuration, DefaultApi } from "@jup-ag/api";
 import { TokenInfo, TokenListProvider } from "@solana/spl-token-registry";
-import { CHAIN_ID, ENV, RPC_CONNECTION, USER_KEYPAIR } from "../constants";
-import { PublicKey } from "@solana/web3.js";
-import {
-  Jupiter
-} from "@jup-ag/core";
+import { CHAIN_ID } from "../constants";
 
 type RouteMap = Map<string, string[]>;
 
@@ -79,11 +75,11 @@ export const useJupiterApiContext = () => {
 
 
   // Load Jupiter
- export const jupiter= Jupiter.load({
-    connection:RPC_CONNECTION,
-    cluster: ENV,
-    user: USER_KEYPAIR, // or public key
-    restrictIntermediateTokens:false,
-    routeCacheDuration: 30
-  })
+//  export const jupiter= Jupiter.load({
+//     connection:RPC_CONNECTION,
+//     cluster: ENV,
+//     user: USER_KEYPAIR, // or public key
+//     restrictIntermediateTokens:false,
+//     routeCacheDuration: 30
+//   })
 
