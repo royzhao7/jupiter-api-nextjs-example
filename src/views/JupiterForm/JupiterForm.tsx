@@ -56,14 +56,6 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
   })
 
 
-
-
-  const options = [
-    { name: 'Swedish', value: 'sv' },
-    { name: 'English', value: 'en' },
-
-  ];
-
   let top3 = '';
   routes?.forEach(route => {
     if (route.marketInfos !== undefined) {
@@ -85,21 +77,9 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
     formValue.outputMint?.toBase58(),
   ]);
 
-  // const intervalFetchRoute=()=>{
-  //   const interval = 100;
-  //   setTimeout(() => {
-  //     const interval = setInterval(() => {
-  //     /* do repeated stuff */
-  //     fetchRoute()
-  //     }, 2000)
-  //   }, 5000)
 
 
-  // console.log(Date.now());
-  // }
-
-
-  //   // Good to add debounce here to avoid multiple calls
+     // Good to add debounce here to avoid multiple calls
   const fetchRoute = React.useCallback(() => {
     setIsLoading(true);
     api
@@ -180,62 +160,7 @@ const JupiterForm: FunctionComponent<IJupiterFormProps> = (props) => {
     setIsSubmitting(false);
   }
 
-  // const fetchRoute = React.useCallback(async() => {
-  //   try {
-  //     const tokens: Token[] = await (await fetch(TOKEN_LIST_URL[ENV])).json(); // Fetch token list from Jupiter API
-  //     const INPUT_MINT_ADDRESS=formValue.inputMint.toBase58();
-  //     const OUTPUT_MINT_ADDRESS=formValue.outputMint.toBase58();
-  //     const inputToken = tokens.find((t) => t.address == INPUT_MINT_ADDRESS); // USDC Mint Info
-  //     const outputToken = tokens.find((t) => t.address == OUTPUT_MINT_ADDRESS); // USDT Mint Info
-  //     const inputAmount= formValue.amount * 10 ** 6;
-  //     const  slippage=formValue.slippage;
-
-  //     setIsLoading(true);
-
-  //     if (!inputToken || !outputToken) {
-  //       return null;
-  //     }
-
-  //     console.log(
-  //       `Getting routes for ${inputAmount} ${inputToken} -> ${outputToken.symbol}...`
-  //     );
-  //     const inputAmountInSmallestUnits = inputToken
-  //       ? Math.round(inputAmount)
-  //       : 0;
-  //       const routes =
-  //       inputToken && outputToken
-  //         ? await (await jupiter).computeRoutes({
-  //             inputMint: new PublicKey(inputToken.address),
-  //             outputMint: new PublicKey(outputToken.address),
-  //             inputAmount: inputAmountInSmallestUnits, // raw input amount of tokens
-  //             slippage,
-  //             forceFetch: false
-  //           })
-  //         : null;
-  //         setRoutes(routes!.routesInfos);
-  //         setIsLoading(false);
-  //     if (routes && routes.routesInfos) {
-  //       console.log(routes.routesInfos[0].marketInfos?.map((info) => info.amm.label));
-  //       console.log(routes.routesInfos[1].marketInfos?.map((info) => info.amm.label));
-  //       console.log(routes.routesInfos[2].marketInfos?.map((info) => info.amm.label));
-  //       console.log("Possible number of routes:", routes.routesInfos.length);
-  //       console.log(
-  //         "Best quote: ",
-  //         routes.routesInfos[0].outAmount / 10 ** outputToken.decimals,
-  //         `(${outputToken.name})`
-  //       );
-  //       return routes;
-  //     } else {
-  //       return null;
-  //     }
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }, [formValue]);
-
-  // useEffect(() => {
-  //   fetchRoute();
-  // }, [fetchRoute]);
+  
 
 
   const validOutputMints = useMemo(

@@ -7,10 +7,12 @@ import {
   // getMathWallet,
   getSolflareWallet,
   getSolletWallet,
+  getTorusWallet,
   // getSolongWallet,
 } from '@solana/wallet-adapter-wallets'
 import { useMemo } from "react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 
 import('@solana/wallet-adapter-react-ui/styles.css' as any) ;
 
@@ -31,7 +33,11 @@ export function ClientWalletProvider(
       // getLedgerWallet(),
       // getSolongWallet(),
       // getMathWallet(),
-      getSolletWallet(),
+      getSolletWallet({
+
+        provider:"https://solflare.com/provider",
+        network:WalletAdapterNetwork.Devnet
+      }),
     ],
     []
   );
